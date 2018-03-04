@@ -131,10 +131,19 @@ _delay_ms(5000);
 }
 void WIFI_tcp_send_data(unsigned char size,unsigned char *data)
 {
+<<<<<<< HEAD
 char  buffer[50]={0};
 init_queue(&uart_buffer); /*clear uart buffer*/
 sprintf(buffer,"AT+CIPSEND=%d\r\n",size);
+=======
+char  buffer[16]={0};
+init_queue(&uart_buffer); /*clear uart buffer*/
+sprintf(buffer,"AT+CIPSEND=%d",size);
+uart_send_string(buffer);
+uart_send_string(data);
+>>>>>>> branch 'master' of https://github.com/mostafaemara/SMART_HOME_IOT.git
 
+<<<<<<< HEAD
 uart_send_string(buffer);
 _delay_ms(1000);
 for(unsigned char i=0;i<(size);i++)
@@ -145,6 +154,9 @@ uart_send_byte(data[i]);
 }
 
  _delay_ms(5000);
+=======
+ _delay_ms(12000);
+>>>>>>> branch 'master' of https://github.com/mostafaemara/SMART_HOME_IOT.git
 
 
 

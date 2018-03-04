@@ -37,6 +37,9 @@ void WIFI_ap_connect(char*ssid,char*pwd);
 void WIFI_ap_disconnect(void);
 void WIFI_tcp_connect(char*ip,char *port);
 void WIFI_tcp_send_data(unsigned char size,unsigned char *data);
+<<<<<<< HEAD
 void WIF_tcp_receive_data(unsigned char*data);
+=======
+>>>>>>> branch 'master' of https://github.com/mostafaemara/SMART_HOME_IOT.git
 void WIFI_tcp_disconnect(void);
 void WIFI_rst(void);

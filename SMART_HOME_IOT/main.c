@@ -16,6 +16,7 @@ WIFI_init();
 
 lcd_inti();
 WIFI_echo_disable();
+<<<<<<< HEAD
 
 
 
@@ -23,11 +24,18 @@ WIFI_echo_disable();
 WIFI_tcp_connect("192.168.1.5","8080");
 
 
+=======
+>>>>>>> branch 'master' of https://github.com/mostafaemara/SMART_HOME_IOT.git
 
 while(1){
 
+<<<<<<< HEAD
 
 }
+=======
+	}
+
+>>>>>>> branch 'master' of https://github.com/mostafaemara/SMART_HOME_IOT.git
 
 
 
