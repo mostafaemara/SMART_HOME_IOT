@@ -11,11 +11,12 @@
 
 ISR(USART_RXC_vect)
 {
-if((!queue_full(&uart_buffer))&&(UDR!='\n')&&(UDR!='\r')&&(UDR!=10)){
+if((!queue_full(&uart_buffer))){
 
 append_queue(UDR,&uart_buffer);
 
 }
+
 }
 
 void uart_init(long baudrate){

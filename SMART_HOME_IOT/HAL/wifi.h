@@ -1,4 +1,5 @@
 /*
+ *
  * wifi.h
  *
  *  Created on: Feb 28, 2018
@@ -10,7 +11,7 @@
 #define HAL_WIFI_H_
 #include<string.h>
 #include"../MCAL/uart.h"
-#define WIFI_MAX_BUFFER 20
+#define WIFI_MAX_BUFFER 50
 #define ST_MODE 1
 #define AP_MODE 2
 #define AP_ST_MODE 3
@@ -20,9 +21,13 @@
 #endif /* HAL_WIFI_H_ */
 #define OK 'K'
 #define ERROR 'R'
+#define CONNECTED 'C'
+#define ALREADY_CONNECTED 'A'
+#define BUSY 'B'
+#define NONE 'N'
+#define SEND_OK 'S'
 typedef unsigned char bool;
 
-char wifi_buffer[WIFI_MAX_BUFFER];
 void WIFI_init(void);
 bool WIFI_rsp(void);
 void WIFI_mode(char mode);
@@ -32,5 +37,6 @@ void WIFI_ap_connect(char*ssid,char*pwd);
 void WIFI_ap_disconnect(void);
 void WIFI_tcp_connect(char*ip,char *port);
 void WIFI_tcp_send_data(unsigned char size,unsigned char *data);
+void WIF_tcp_receive_data(unsigned char*data);
 void WIFI_tcp_disconnect(void);
 void WIFI_rst(void);
