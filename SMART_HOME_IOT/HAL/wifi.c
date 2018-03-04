@@ -104,13 +104,15 @@ void WIFI_tcp_connect(char*ip,char* port){
 
 
 }
-void WIFI_tcp_send_byte(unsigned char byte){
-	uart_send_string("AT+CIPSEND=6");
+void WIFI_tcp_send_data(unsigned char size,unsigned char *data)
+{
+char  buffer[16]={0};
+init_queue(&uart_buffer); /*clear uart buffer*/
+sprintf(buffer,"AT+CIPSEND=%d",size);
+uart_send_string(buffer);
+uart_send_string(data);
 
- uart_send_byte(byte);
- uart_send_byte(byte);
- uart_send_byte(byte);
- _delay_ms(50);
+ _delay_ms(12000);
 
 
 
