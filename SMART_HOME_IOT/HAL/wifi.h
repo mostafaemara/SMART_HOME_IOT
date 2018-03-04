@@ -31,6 +31,6 @@ void WIFI_echo_disable(void);
 void WIFI_ap_connect(char*ssid,char*pwd);
 void WIFI_ap_disconnect(void);
 void WIFI_tcp_connect(char*ip,char *port);
-void WIFI_tcp_send_byte(unsigned char byte);
+void WIFI_tcp_send_data(unsigned char size,unsigned char *data);
 void WIFI_tcp_disconnect(void);
 void WIFI_rst(void);
