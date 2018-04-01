@@ -7,15 +7,52 @@
 
 #include"uart.h"
 #include<util/delay.h>
+volatile queue uart_buffer;
+volatile queue uart_tx_buffer;
 
 
 ISR(USART_RXC_vect)
 {
+
+
 if((!queue_full(&uart_buffer))){
 
 append_queue(UDR,&uart_buffer);
 
 }
+PORTD|=(1<<PD7);
+if(UDR=='\r'){
+
+
+    TCNT1=0xffff;
+
+
+}else{
+
+timer1_stop();
+timer1_start(1,31000);
+}
+
+}
+
+
+ISR(USART_UDRE_vect)
+{
+if((queue_size(&uart_tx_buffer)!=0)){
+
+UDR=serve_queue(&uart_tx_buffer);
+
+}else{
+
+
+
+
+	UCSRB&=~(1<<UDRIE);
+
+
+}
+
+
 
 }
 
@@ -24,14 +61,13 @@ void uart_init(long baudrate){
 
 
 	sei();
-	UCSRB=(1<<RXEN)|(1<<TXEN)|(1<<RXCIE);
+	UCSRB=(1<<RXEN)|(1<<TXEN)|(1<<RXCIE)|(1<<UDRIE);
 
 
 			UCSRC=(1<<URSEL)|(1<<UCSZ0)|(1<<UCSZ1);
 			UBRRL=(unsigned char)(((F_CPU)/(16*baudrate))-1);
 
-
-
+init_queue(&uart_tx_buffer);
 init_queue(&uart_buffer);
 
 }
@@ -58,7 +94,41 @@ int uart_recieve_byte(void){
 }
 
 
+void uart_append_tx_buffer(unsigned char*data,unsigned char size){
+if(queue_size(&uart_tx_buffer)==0){
+	unsigned char i=0;
+for(i=0;i<(size);i++){
 
+
+
+
+	if(!queue_full(&uart_tx_buffer)){
+
+
+
+append_queue(data[i],&uart_tx_buffer);
+
+
+
+	}
+
+
+
+}
+
+
+UCSRB|=(1<<UDRIE);
+
+
+
+
+
+
+
+
+
+}
+}
 
 void uart_send_string(char* ptr){
 

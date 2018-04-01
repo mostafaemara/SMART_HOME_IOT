@@ -26,20 +26,48 @@
 #define BUSY 'B'
 #define NONE 'N'
 #define SEND_OK 'S'
+#define SEND_FAIL 'F'
+#define CLOSED 'D'
+#define DATA 'T'
+#define OFF 0
+#define WIFI_CONNECTED 'W'
+#define WIFI_DISCONNECT 'X'
+#define WIFI_GOT_IP 'I'
+#define NO_IP 'O'
+#define READY_TO_RCV 'Y'
+#define LINK_NOT_VALID 'V'
+#define STATUS_TCP_CONNECTED '3'
+#define STATUS_TCP_DISCONNECTED '4'
+#define STATUS_WIFI_NOT_CONNECTED '5'
+#define STATUS_WIFI_CONNECTED_TCP_NOT '2'
+
+#define TRY_COUNT 1
+#define WIFI_WIAT_COUNTER 4500000
 typedef unsigned char bool;
+typedef unsigned long counter;
 
 void WIFI_init(void);
 bool WIFI_rsp(void);
+bool WIFI_status(void);
 void WIFI_mode(char mode);
 void WIFI_test(void);
-void WIFI_echo_disable(void);
-void WIFI_ap_connect(char*ssid,char*pwd);
+bool WIFI_echo_disable(void);
+unsigned char WIFI_ap_connect(char*ssid,char*pwd);
 void WIFI_ap_disconnect(void);
-void WIFI_tcp_connect(char*ip,char *port);
+bool WIFI_tcp_connect(char*ip,char *port);
 void WIFI_tcp_send_data(unsigned char size,unsigned char *data);
-<<<<<<< HEAD
 void WIF_tcp_receive_data(unsigned char*data);
-=======
->>>>>>> branch 'master' of https://github.com/mostafaemara/SMART_HOME_IOT.git
 void WIFI_tcp_disconnect(void);
 void WIFI_rst(void);
+void WIFI_wait(void);
+void WIFI_data_wait(void);
+void WIFI_get_data(unsigned char *data_ptr);
+extern volatile unsigned char wifi_rsp,wifi_rcv_data,wifi_data_size;
+extern volatile queue data_buffer;
+
+
+extern volatile unsigned char wifi_buffer[WIFI_MAX_BUFFER];
+extern volatile unsigned char i_counter,j_counter;
+extern volatile unsigned char temp_buffer[10];
+
+

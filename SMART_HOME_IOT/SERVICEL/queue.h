@@ -12,7 +12,7 @@
 #define FALSE 0
 typedef  char qelement;
 
-typedef struct  {
+typedef volatile struct  {
 	qelement qe[MAXQUEUE];
     unsigned char front;
     char rear;
@@ -24,7 +24,7 @@ typedef struct  {
 }queue;
 
 
-void init_queue(queue*qptr);
+ void init_queue(queue*qptr);
 void append_queue(qelement e,queue*qptr);
 qelement serve_queue(queue*ptr);
 unsigned char queue_full(queue*qptr);
