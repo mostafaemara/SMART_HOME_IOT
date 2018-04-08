@@ -12,135 +12,193 @@
 
 
 #include"HAL/mqtt.h"
+volatile unsigned char timer_counter=0,timer_flag=0;
+
+ISR(TIMER0_OVF_vect){
 
 
+	if((timer_flag==0)){
+if((timer_counter<200)){
+timer_counter++;
+}else{
+
+	timer_counter=0;
+	timer_flag=1;
 
 
+}
 
+}
+}
 
 
 
 int main(){
-unsigned char *bufz;
+unsigned char* buffer;
 
 
 DDRD|=1<<PD7;
 DDRA=0xff;
-PORTA=0x00;
+PORTA=0xff;
 	lcd_inti();
-unsigned char data[15]={0};
+
+	timer0_init();
+
 sei();
 WIFI_init();
 WIFI_echo_disable();
 
+timer0_start(1024,5);
 
-if(WIFI_ap_connect("SHAZAM","iamawesome321")==TRUE){
+if(MQTT_connect()==1){
 
 
-	lcd_goto(1,1);
-	lcd_print("WIFI CONNECTED");
+if(MQTT_sub()==TRUE){
+
+
+	lcd_clear_screen();
+	lcd_goto(2,6);
+
+
+	lcd_print("ONLINE");
 }else{
-
-	lcd_goto(1,1);
-	lcd_print("WIFI FAILD");
-
 
 
 
 }
-if(WIFI_tcp_connect("10.42.0.161","8080")==TRUE){
-
-lcd_clear_screen();
-	lcd_goto(1,1);
-	lcd_print("TCP CONNECTED");
-	WIFI_tcp_send_data(6,"HELLO\n");
-
-
 }else{
 
 
 	lcd_clear_screen();
-		lcd_goto(1,1);
-		lcd_print("TCP FAILD");
+	lcd_goto(2,6);
 
+			lcd_print("OFFLINE   ");
 }
 
-uart_append_tx_buffer("AT+CIPSTATUS\r\n",strlen("AT+CIPSTATUS\r\n"));
+
+
+
+
+
 
 while(1){
+	if(timer_flag==1){
 
-	if(WIFI_status()==STATUS_TCP_CONNECTED){
-		WIFI_wait();
 
-		WIFI_tcp_send_data(3,"HI\n");
+	switch(WIFI_status()){
 
-	}
-	if(WIFI_status()==STATUS_TCP_CONNECTED){
+	case STATUS_TCP_DISCONNECTED:
+		if(MQTT_connect()==1){
 
-WIFI_wait();
 
-WIFI_tcp_send_data(6,"HELLO\n");
-
-	}else if(WIFI_status()==STATUS_TCP_DISCONNECTED){
-		WIFI_wait();
-
-		if(WIFI_tcp_connect("10.42.0.161","8080")==TRUE){
-
-		lcd_clear_screen();
-			lcd_goto(1,1);
-			lcd_print("TCP CONNECTED");
+		if(MQTT_sub()==TRUE){
 
 
 
+			lcd_goto(2,6);
+
+
+			lcd_print("ONLINE   ");
 		}else{
 
 
-			lcd_clear_screen();
-				lcd_goto(1,1);
-				lcd_print("TCP FAILD");
+
+		}
+		}else{
+
+
+			lcd_goto(2,6);
+
+
+					lcd_print("OFFLINE   ");
 
 		}
 
+break;
+	case STATUS_WIFI_CONNECTED_TCP_NOT:
+
+		if(MQTT_connect()==1){
 
 
-	}else if(WIFI_status()==STATUS_WIFI_NOT_CONNECTED){
-		WIFI_wait();
+			if(MQTT_sub()==TRUE){
+
+
+
+				lcd_goto(2,6);
+
+
+				lcd_print("ONLINE   ");
+			}else{
+
+
+
+			}
+			}else{
+
+
+				lcd_goto(2,6);
+
+
+				lcd_print("OFFLINE   ");
+
+
+			}
+
+
+		break;
+	case STATUS_WIFI_NOT_CONNECTED:
+
+lcd_clear_screen();
+lcd_goto(1,2);
+lcd_print("WIFI DISCONNECT");
+lcd_goto(2,6);
+
+lcd_print("OFFLINE  ");
+
+
+break;
+
+	case STATUS_TCP_CONNECTED:
 		lcd_clear_screen();
-				lcd_goto(1,1);
-				lcd_print("WIFI DISCONNECTED");
+		lcd_goto(1,2);
+		lcd_print("WIFI CONNECTED");
+		lcd_goto(2,6);
 
+		lcd_print("ONLINE  ");
+break;
 
-
-
-
-
-
-
-	}else if(WIFI_status()==STATUS_WIFI_CONNECTED_TCP_NOT){
-
-
-		lcd_clear_screen();
-					lcd_goto(1,1);
-					lcd_print("WIFI CONNECTED");
-
-
-
-
-
+default:
+	break;
+	}
+timer_flag=0;
 }
 
 if(wifi_rcv_data==DATA){
 
-WIFI_get_data(data);
 
-lcd_goto(2,2);
-lcd_print(data);
+	MQTT_get_payload(&buffer);
 
+if(strcmp(buffer,"LED ON")==0){
+
+
+PORTA=0x00;
+
+MQTT_pub();
+
+
+}else if(strcmp(buffer,"LED OF")==0){
+	PORTA =0xff;
+
+	MQTT_pub();
+}else{
+
+
+}
+
+wifi_rcv_data=0;
+}
 
 
 
 }
-}
-
-
 }

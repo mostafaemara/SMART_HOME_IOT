@@ -34,6 +34,7 @@
 #define WIFI_DISCONNECT 'X'
 #define WIFI_GOT_IP 'I'
 #define NO_IP 'O'
+#define DNS_FAIL 'f'
 #define READY_TO_RCV 'Y'
 #define LINK_NOT_VALID 'V'
 #define STATUS_TCP_CONNECTED '3'
@@ -42,7 +43,7 @@
 #define STATUS_WIFI_CONNECTED_TCP_NOT '2'
 
 #define TRY_COUNT 1
-#define WIFI_WIAT_COUNTER 4500000
+#define WIFI_WIAT_COUNTER 450000000
 typedef unsigned char bool;
 typedef unsigned long counter;
 
@@ -52,7 +53,7 @@ bool WIFI_status(void);
 void WIFI_mode(char mode);
 void WIFI_test(void);
 bool WIFI_echo_disable(void);
-unsigned char WIFI_ap_connect(char*ssid,char*pwd);
+unsigned char WIFI_ap_connect(unsigned char*ssid,unsigned char*pwd);
 void WIFI_ap_disconnect(void);
 bool WIFI_tcp_connect(char*ip,char *port);
 void WIFI_tcp_send_data(unsigned char size,unsigned char *data);

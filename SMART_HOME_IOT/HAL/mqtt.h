@@ -12,7 +12,7 @@
 #define SERVER_ADD "m14.cloudmqtt.com"
 #define SERVER_PORT "17582"
 #define TOPIC "TEST"
-#define KEEP_ALIVE 100
+#define KEEP_ALIVE 200
 #define HAL_MQTT_H_
 
 
@@ -23,6 +23,8 @@
 
 
 
-
+unsigned char MQTT_sub(void);
 unsigned char MQTT_connect(void);
 int MQTT_get_payload(unsigned char **payload);
+
+void MQTT_pub(void);

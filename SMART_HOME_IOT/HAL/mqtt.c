@@ -32,7 +32,7 @@ unsigned char MQTT_connect(void)
 
 	unsigned char buff[50]={0};
 	int len=0;
-
+ int s=0;
 	unsigned char buffer_rcv[50]={0};
 	MQTTString topicString = MQTTString_initializer;
 	MQTTPacket_connectData data=MQTTPacket_connectData_initializer;
@@ -42,36 +42,46 @@ unsigned char MQTT_connect(void)
 	data.clientID.cstring=ID;
 	topicString.cstring=TOPIC;
 
-	WIFI_tcp_connect(SERVER_ADD,SERVER_PORT);
+	WIFI_tcp_disconnect();
+	wifi_rsp=0;
+	_delay_ms(500);
+
+	if(WIFI_tcp_connect(SERVER_ADD,SERVER_PORT)==TRUE){
+
+
+
+	}else{
+
+		return FALSE;
+
+	}
+
+
 
 	len=MQTTSerialize_connect(buff,50,&data);
+
+
 	WIFI_tcp_send_data(len,buff);
 
-      WIFI_data_wait();
+     WIFI_data_wait();
+
+
 
 
       if(wifi_rcv_data==DATA){
       	wifi_rcv_data=0;
       if(MQTTPacket_read(buffer_rcv,50,get_data)==CONNACK){
+    	  return TRUE;
 
 
-
-    	  len = MQTTSerialize_subscribe(buff,50, 0, 1, 1, &topicString,1);
-    	  WIFI_tcp_send_data(len,buff);
-
-    	  WIFI_data_wait();
-    	  if(wifi_rcv_data==DATA){
-    	      	wifi_rcv_data=0;
-    	  if(MQTTPacket_read(buffer_rcv,50,get_data)==SUBACK){
-
-         return 1;
 
 
     	  }else{
 
 
-    		  return 0;
-    	  }
+
+
+    		  return FALSE;
     	  }
 
 
@@ -82,17 +92,7 @@ unsigned char MQTT_connect(void)
 
 
 
-    	  return 0;
-      }
-
-
-
-
-
-      }else{
-
-
-    	  return 0;
+    	  return FALSE;
       }
 
 
@@ -105,6 +105,9 @@ unsigned char MQTT_connect(void)
 
 
 
+
+
+return FALSE;
 
 
 
@@ -148,5 +151,70 @@ int MQTT_get_payload(unsigned char **payload){
 
 
 	return payloadlen_in;
+
+}
+
+
+unsigned char MQTT_sub(void){
+	unsigned char buff[50]={0};
+		int len=0;
+	 int s=0;
+		unsigned char buffer_rcv[50]={0};
+		MQTTString topicString = MQTTString_initializer;
+
+
+	topicString.cstring=TOPIC;
+
+	  len = MQTTSerialize_subscribe(buff,50, 0, 1, 1, &topicString,&s);
+	  WIFI_tcp_send_data(len,buff);
+
+	  WIFI_data_wait();
+	  if(wifi_rcv_data==DATA){
+	      	wifi_rcv_data=0;
+	  if(MQTTPacket_read(buffer_rcv,50,get_data)==SUBACK){
+
+   return TRUE;
+
+
+	  }else{
+
+
+		  return FALSE;
+	  }
+
+
+
+
+
+
+	  }else{
+
+
+
+		  return FALSE;
+
+	  }
+
+
+}
+void MQTT_pub(void){
+
+unsigned char buff[20]={0};
+int len=0;
+
+
+
+
+MQTTString topicString = MQTTString_initializer;
+
+	topicString.cstring=TOPIC;
+
+
+len = MQTTSerialize_publish(buff,40, 0, 0, 0, 0, topicString,(unsigned char*)"OK",2);
+
+
+WIFI_tcp_send_data(len,buff);
+
+
 
 }

@@ -57,6 +57,7 @@ else if((strcmp(wifi_buffer,"SEND OK\r\n"))==0)
 
 
 }
+
 else if((strcmp(wifi_buffer,"> "))==0)
 {
 
@@ -133,6 +134,18 @@ else if((strcmp(wifi_buffer,"\r\n"))==0)
 {
 
 wifi_rsp=0;
+
+}
+else if((strcmp(wifi_buffer,"FAIL\r\n"))==0)
+{
+
+wifi_rsp=9;
+
+}
+else if((strcmp(wifi_buffer,"DNS Fail\r\n"))==0)
+{
+
+wifi_rsp=DNS_FAIL;
 
 }
 else if((strcmp(wifi_buffer,"no ip\r\n"))==0)
@@ -252,7 +265,7 @@ bool WIFI_echo_disable(void){
 
 
 		wifi_rsp=0;
-		uart_append_tx_buffer("ATE0\r\n",strlen("ATE0\r\n"));
+		uart_append_tx_buffer((unsigned char*)"ATE0\r\n",strlen("ATE0\r\n"));
 		WIFI_wait();
 		if(wifi_rsp==OK){
 
@@ -277,10 +290,10 @@ void WIFI_mode(char mode){
 
 
 	wifi_rsp=0;
-	char  buffer[16]={0};
+	unsigned char  buffer[16]={0};
 	init_queue(&uart_buffer);
 	sprintf(buffer,"AT+CWMODE=%d\r\n",mode);
-		uart_append_tx_buffer(buffer,strlen(buffer));
+		uart_append_tx_buffer(buffer,strlen((char*)buffer));
 		WIFI_wait();
 		if(wifi_rsp==OK){
 
@@ -313,80 +326,6 @@ break;
 	}
 	wifi_rsp=0;
 }
-bool WIFI_ap_connect(char*ssid,char*pwd)
-{
-wifi_rsp=0;
-char  buffer[50]={0};
-init_queue(&uart_buffer);
-sprintf(buffer,"AT+CWJAP=\"%s\",\"%s\"\r\n",ssid,pwd);
-uart_append_tx_buffer(buffer,strlen(buffer));
-WIFI_wait();
-
-
-   if (wifi_rsp==WIFI_CONNECTED){
-
-    WIFI_wait();
-    if(wifi_rsp==WIFI_GOT_IP){
-
-    	WIFI_wait();
-    	if(wifi_rsp==OK){
-
-    		return TRUE;
-
-    	}else{
-    		return FALSE;
-
-
-    	}
-
-
-    }else{
-    	return FALSE;
-
-
-    }
-
-   }else if(wifi_rsp==WIFI_DISCONNECT){
-	   WIFI_wait();
-	     if (wifi_rsp==WIFI_CONNECTED){
-
-	      WIFI_wait();
-	      if(wifi_rsp==WIFI_GOT_IP){
-
-	      	WIFI_wait();
-	      	if(wifi_rsp==OK){
-
-	      		return TRUE;
-
-	      	}else{
-	      		return FALSE;
-
-
-	      	}
-
-
-	      }else{
-	      	return FALSE;
-
-
-	      }
-
-	     }
-
-
-
-
-
-   }else{
-
-	   return FALSE;
-
-   }
-
-
-
-
-}
 void WIFI_ap_disconnect(void){
 	wifi_rsp=0;
 	init_queue(&uart_buffer);
@@ -403,25 +342,37 @@ bool WIFI_tcp_connect(char*ip,char* port){
 	char  buffer[50]={0};
 	init_queue(&uart_buffer);
 	sprintf(buffer,"AT+CIPSTART=\"TCP\",\"%s\",%s\r\n",ip,port);
-	uart_append_tx_buffer(buffer,strlen(buffer));
+	uart_append_tx_buffer((unsigned char *)buffer,strlen(buffer));
+	wifi_rsp=0;
 	WIFI_wait();
 		switch(wifi_rsp){
 		case(CONNECTED):
-	      WIFI_wait();
+		 WIFI_wait();
+		wifi_rsp=0;
+
+
 		return TRUE;
 break;
 		case(ALREADY_CONNECTED):
 			WIFI_wait();
+		wifi_rsp=0;
 		return TRUE;
 		break;
 		case(ERROR):
         WIFI_wait();
+		wifi_rsp=0;
 		return FALSE;
 		break;
 		case(NO_IP):
 		WIFI_wait();
+		wifi_rsp=0;
 		return FALSE;
 		break;
+		case(DNS_FAIL):
+			WIFI_wait();
+			wifi_rsp=0;
+			return FALSE;
+			break;
 		default:
 			return FALSE;
 				break;
@@ -436,23 +387,20 @@ break;
 }
 
 void WIFI_tcp_disconnect(void){
-	for(unsigned char i=0;i<TRY_COUNT;i++){
-	wifi_rsp=0;
-	uart_append_tx_buffer("AT+CIPCLOSE\r\n",strlen("AT+CIPCLOSE\r\n"));
+
+	init_queue(&uart_buffer);
+	uart_append_tx_buffer((unsigned char*)"AT+CIPCLOSE\r\n",strlen("AT+CIPCLOSE\r\n"));
 	WIFI_wait();
 
 if(wifi_rsp==CLOSED){
+WIFI_wait();
 
-	break;
-}else{
-
+}else if(wifi_rsp==ERROR){
 
 
 }
 
 
-	}
-	wifi_rsp=0;
 
 }
 void WIFI_tcp_send_data(unsigned char size,unsigned char *data)
@@ -463,7 +411,7 @@ void WIFI_tcp_send_data(unsigned char size,unsigned char *data)
 init_queue(&uart_buffer); /*clear uart buffer*/
 sprintf(buffer,"AT+CIPSEND=%d\r\n",size);
 
-uart_append_tx_buffer(buffer,strlen(buffer));
+uart_append_tx_buffer((unsigned char*)buffer,strlen(buffer));
 WIFI_wait();
 if(wifi_rsp==OK)
 {
@@ -537,6 +485,80 @@ void WIFI_wait(void){
 }
 
 
+bool WIFI_ap_connect(unsigned char*ssid,unsigned char*pwd)
+{
+wifi_rsp=0;
+unsigned char  buffer[50]={0};
+init_queue(&uart_buffer);
+sprintf(buffer,"AT+CWJAP=\"%s\",\"%s\"\r\n",ssid,pwd);
+uart_append_tx_buffer(buffer,strlen((char*)buffer));
+WIFI_wait();
+
+
+   if (wifi_rsp==WIFI_CONNECTED){
+
+    WIFI_wait();
+    if(wifi_rsp==WIFI_GOT_IP){
+
+    	WIFI_wait();
+    	if(wifi_rsp==OK){
+
+    		return TRUE;
+
+    	}else{
+    		return FALSE;
+
+
+    	}
+
+
+    }else{
+    	return FALSE;
+
+
+    }
+
+   }else if(wifi_rsp==WIFI_DISCONNECT){
+	   WIFI_wait();
+	     if (wifi_rsp==WIFI_CONNECTED){
+
+	      WIFI_wait();
+	      if(wifi_rsp==WIFI_GOT_IP){
+
+	      	WIFI_wait();
+	      	if(wifi_rsp==OK){
+
+	      		return TRUE;
+
+	      	}else{
+	      		return FALSE;
+
+
+	      	}
+
+
+	      }else{
+	      	return FALSE;
+
+
+	      }
+
+	     }
+
+
+
+
+
+   }else{
+
+	   return FALSE;
+
+   }
+
+
+
+return FALSE;
+}
 void WIFI_data_wait(void){
 
 
@@ -595,13 +617,18 @@ wifi_data_size=0;
 }
 
 bool WIFI_status(void){
-	uart_append_tx_buffer("AT+CIPSTATUS\r\n",strlen("AT+CIPSTATUS\r\n"));
 
+
+uart_append_tx_buffer((unsigned char*)"AT+CIPSTATUS\r\n",strlen("AT+CIPSTATUS\r\n"));
 WIFI_wait();
-if(wifi_rsp==OK){
-	WIFI_wait();
-return wifi_rsp;
-}
+
+
+
+  return wifi_rsp;
+
+
+
+
 
 
 
